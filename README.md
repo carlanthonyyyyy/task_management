@@ -19,3 +19,9 @@ A simple and efficient **Task Management App** built with **React and Firebase**
 git clone git@github.com:carlanthonyyyyy/task-management.git
 cd task-management
 
+Install Dependencies
+npm install
+
+Start the Development Server
+npm start
+
