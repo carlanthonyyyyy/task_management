@@ -1,9 +1,11 @@
-import { auth } from "./firebase"; // ✅ Correct import
+// auth.js
 import { 
+  getAuth, 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut 
 } from "firebase/auth";
+import { auth } from "./firebase";
 
 // Signup function
 export const signUp = async (email, password) => {
