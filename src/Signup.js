@@ -1,84 +1,77 @@
-import React, { useState } from "react";
-import { signUp } from "../auth";
-import { Link, useNavigate } from "react-router-dom";
-import "./Auth.css";
+// Signup.js
+import React, { useState } from 'react';
+import { auth } from './firebase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import './App.css';
 
-const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+function Signup() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const getFriendlyError = (code) => {
-    switch (code) {
-      case "auth/email-already-in-use":
-        return "Email is already in use.";
-      case "auth/weak-password":
-        return "Password should be at least 6 characters.";
-      default:
-        return "Signup failed. Please try again.";
-    }
-  };
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-
-    if (!email.includes("@")) return setError("Enter a valid email.");
-    if (password.length < 6) return setError("Password must be at least 6 characters.");
-
-    setError(null);
-    setLoading(true);
+  const handleSignUp = async () => {
     try {
-      await signUp(email, password, role);
-      navigate("/dashboard");
-    } catch (err) {
-      setError(getFriendlyError(err.code));
-    } finally {
-      setLoading(false);
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert('Signed up successfully!');
+      navigate('/');
+    } catch (error) {
+      alert(error.message);
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-box">
-        <h2>SIGN UP</h2>
-        {error && <p className="error">{error}</p>}
-        <form onSubmit={handleSignup}>
-          <label htmlFor="email">Email</label>
+    <div className="container">
+      {/* Left Panel */}
+      <div className="left-panel">
+        <div className="logo">
+          <h1>TMA</h1>
+          <p>Task Management System</p>
+        </div>
+        <div className="login-box">
+          <h2>SIGN UP</h2>
           <input
-            id="email"
             type="email"
-            placeholder="Email"
-            autoFocus
+            placeholder="email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
           />
-          <label htmlFor="password">Password</label>
           <input
-            id="password"
             type="password"
-            placeholder="Password"
+            placeholder="password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
-          <label htmlFor="role">Role</label>
-          <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button type="submit" disabled={loading}>
-            {loading ? "Signing Up..." : "SIGN UP"}
-          </button>
-        </form>
-        <p>
-          Already have an account? <Link to="/login">Log In</Link>
-        </p>
+          <div className="auth-buttons">
+            <button onClick={handleSignUp}>SIGN UP</button>
+            <button onClick={() => navigate('/')}>BACK</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Panel */}
+      <div className="right-panel">
+        <div className="help-box">
+          <h2>JOIN US</h2>
+          <p>START MANAGING YOUR TASKS TODAY</p>
+          <div className="help-icons">
+            <div className="icon-box" />
+            <div className="icon-box" />
+            <div className="icon-box" />
+            <div className="icon-box" />
+            <div className="icon-box" />
+          </div>
+        </div>
+        <div className="contact-info">
+          <p><strong>FACEBOOK:</strong> TMA PH</p>
+          <p><strong>X:</strong> @TMAPH</p>
+          <p><strong>INSTAGRAM:</strong> TMA_PH</p>
+          <p><strong>CONTACT NO:</strong> 0945-876-9089</p>
+          <p><strong>EMAIL:</strong> TMAPH@BUSINESS.COM</p>
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default Signup;
-

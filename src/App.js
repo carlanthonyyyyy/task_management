@@ -1,46 +1,19 @@
 import React, { useState } from 'react';
-import { auth } from './firebase';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-} from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 
 function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
-  const signUp = async () => {
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert('Signed up successfully!');
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
-  const logIn = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert('Logged in!');
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
-  const logOut = async () => {
-    try {
-      await signOut(auth);
-      alert('Logged out!');
-    } catch (error) {
-      alert(error.message);
-    }
+  const logIn = () => {
+    // Login logic will go here or use Firebase as before
+    alert('Log in logic here');
   };
 
   return (
     <div className="container">
-      {/* Left Panel */}
       <div className="left-panel">
         <div className="logo">
           <h1>TMA</h1>
@@ -62,12 +35,11 @@ function App() {
           />
           <div className="auth-buttons">
             <button onClick={logIn}>LOG IN</button>
-            <button onClick={signUp}>SIGN UP</button>
+            <button onClick={() => navigate('/signup')}>SIGN UP</button>
           </div>
         </div>
       </div>
 
-      {/* Right Panel */}
       <div className="right-panel">
         <div className="help-box">
           <h2>NEED HELP?</h2>
