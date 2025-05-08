@@ -1,19 +1,27 @@
 import React, { useState } from 'react';
+import { auth } from './firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
-function App() {
+function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const logIn = () => {
-    // Login logic will go here or use Firebase as before
-    alert('Log in logic here');
+  const handleLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      alert('Logged in successfully!');
+      navigate('/home'); // or wherever you want to redirect
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
     <div className="container">
+      {/* Left Panel */}
       <div className="left-panel">
         <div className="logo">
           <h1>TMA</h1>
@@ -22,24 +30,25 @@ function App() {
         <div className="login-box">
           <h2>LOG IN</h2>
           <input
-            type="text"
-            placeholder="username"
+            type="email"
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <input
             type="password"
-            placeholder="password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <div className="auth-buttons">
-            <button onClick={logIn}>LOG IN</button>
+            <button onClick={handleLogin}>LOG IN</button>
             <button onClick={() => navigate('/signup')}>SIGN UP</button>
           </div>
         </div>
       </div>
 
+      {/* Right Panel */}
       <div className="right-panel">
         <div className="help-box">
           <h2>NEED HELP?</h2>
@@ -64,4 +73,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;

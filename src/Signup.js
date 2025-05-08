@@ -10,7 +10,6 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
   const navigate = useNavigate();
 
   const handleSignUp = async () => {
@@ -22,7 +21,6 @@ function Signup() {
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
-        username,
         firstName,
         lastName,
         createdAt: new Date(),
@@ -57,12 +55,6 @@ function Signup() {
             placeholder="Last name"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
           />
           <input
             type="email"

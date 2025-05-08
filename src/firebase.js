@@ -1,23 +1,25 @@
 // firebase.js
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-// Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCsh-XFX30sxSc8-7dyhycV4tnMS5dMm-0",
-  authDomain: "task-management-e51db.firebaseapp.com",
-  projectId: "task-management-e51db",
-  storageBucket: "task-management-e51db.appspot.com",
-  messagingSenderId: "26024188765",
-  appId: "1:26024188765:web:80d357b90b162179cc66b4",
-  measurementId: "G-4220QVZBBL"
+  apiKey: "AIzaSyDI0byWWUJNSqfOQfEONvE-A8EDp18kiQU",
+  authDomain: "task-management-4d66e.firebaseapp.com",
+  projectId: "task-management-4d66e",
+  storageBucket: "task-management-4d66e.appspot.com",
+  messagingSenderId: "107888627926",
+  appId: "1:107888627926:web:64ea640c0085a6382ff977",
+  measurementId: "G-C1Z78Q88KJ"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// Initialize Firebase Authentication and Firestore
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Export the necessary Firebase services
-export { app, auth, db };
+export { auth, db };
