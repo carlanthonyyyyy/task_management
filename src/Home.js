@@ -1,17 +1,16 @@
-// Home.js
 import React from 'react';
-import './Home.css'; // We'll style separately here
+import './Home.css';
 
 function Home() {
     return (
         <div className="home-container">
             {/* Sidebar */}
             <div className="sidebar">
-                <div className="nav-icon">🏠</div>
-                <div className="nav-icon">📋</div>
-                <div className="nav-icon">🗓️</div>
-                <div className="nav-icon">📝</div>
-                <div className="nav-icon">⚙️</div>
+                <button className="nav-icon" aria-label="Home">🏠</button>
+                <button className="nav-icon" aria-label="Tasks">📋</button>
+                <button className="nav-icon" aria-label="Calendar">🗓️</button>
+                <button className="nav-icon" aria-label="Notes">📝</button>
+                <button className="nav-icon" aria-label="Settings">⚙️</button>
             </div>
 
             {/* Main Content */}
