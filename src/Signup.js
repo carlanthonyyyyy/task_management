@@ -17,7 +17,7 @@ function Signup() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Create user data in Firestore
+      // Save user data to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
@@ -27,10 +27,14 @@ function Signup() {
         role: 'user'
       });
 
-      alert('Signed up successfully!');
-      navigate('/');
+      // Save full name to localStorage
+      const fullName = `${firstName} ${lastName}`;
+      localStorage.setItem('userFullName', fullName);
+
+      alert('Account created successfully!');
+      navigate('/home');
     } catch (error) {
-      alert(error.message);
+      alert(`Signup failed: ${error.message}`);
     }
   };
 
