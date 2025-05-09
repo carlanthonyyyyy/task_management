@@ -1,132 +1,305 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { 
+  FiPlus, 
+  FiBell, 
+  FiSettings, 
+  FiUser, 
+  FiSun, 
+  FiMoon, 
+  FiTrash, 
+  FiEdit, 
+  FiCalendar 
+} from 'react-icons/fi';
 import './Home.css';
 
-function Home() {
-    const [currentPage, setCurrentPage] = useState('Home');
+const Home = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('priority');
+  const [editTask, setEditTask] = useState(null);
 
-    const handleButtonClick = (page) => {
-        setCurrentPage(page);
-        let url = '';
+  const [team] = useState([
+    { id: 1, name: 'John Doe', online: true },
+    { id: 2, name: 'Jane Smith', online: false },
+    { id: 3, name: 'Mike Johnson', online: true }
+  ]);
 
-        // DITO YUNG MGA URL
-        switch (page) {
-            case 'Home':
-                url = '/home';
-                break;  
-            case 'Tasks':
-                url = '/tasks';
-                break;  
-            case 'Calendar':
-                url = '/calendar';
-                break;
-            case 'Notes':
-                url = '/notes';
-                break;  
-            case 'Settings':
-                url = '/settings';
-                break; 
-            default:
-                url = '/';
-        }
+  useEffect(() => {
+    const sampleTasks = [
+      { 
+        id: '1', 
+        text: 'Complete project proposal', 
+        completed: false, 
+        dueDate: '2023-08-25', 
+        priority: 'high', 
+        category: 'Work' 
+      },
+      { 
+        id: '2', 
+        text: 'Team meeting', 
+        completed: false, 
+        dueDate: '2023-08-26', 
+        priority: 'medium', 
+        category: 'Meeting' 
+      },
+      { 
+        id: '3', 
+        text: 'Review code', 
+        completed: true, 
+        dueDate: '2023-08-24', 
+        priority: 'low', 
+        category: 'Development' 
+      }
+    ];
+    setTasks(sampleTasks);
+  }, []);
 
-        console.log(`Navigating to: ${url}`);
-        
-        window.location.href = url;
-    };
+  const handleDragEnd = (result) => {
+    if (!result.destination) return;
+    const items = Array.from(tasks);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setTasks(items);
+  };
 
-    return (
-        <div className="home-container">
-            <nav className="sidebar">
-                {[
-                    { icon: '🏠', label: 'Home' },
-                    { icon: '📋', label: 'Tasks' },
-                    { icon: '🗓️', label: 'Calendar' },
-                    { icon: '📝', label: 'Notes' },
-                    { icon: '⚙️', label: 'Settings' },
-                ].map((item) => (
-                    <button
-                        key={item.label}
-                        className="nav-icon"
-                        aria-label={item.label}
-                        title={item.label}
-                        onClick={() => handleButtonClick(item.label)} // Handles button click
-                    >
-                        {item.icon}
-                    </button>
-                ))}
-            </nav>
+  const addTask = () => {
+    if (newTask.trim()) {
+      const task = {
+        id: Date.now().toString(),
+        text: newTask,
+        completed: false,
+        dueDate: '',
+        priority: 'medium',
+        category: 'General'
+      };
+      setTasks([...tasks, task]);
+      setNewTask('');
+    }
+  };
 
-            <main className="main-content" role="main">
-                <header className="header">
-                    <h1>TMA</h1>
-                    <p>Task Management System</p>
-                </header>
+  const deleteTask = (taskId) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
+  };
 
-                <section className="welcome-title">
-                    <h2>Welcome, User!</h2>
-                </section>
+  const toggleTask = (taskId) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    ));
+  };
 
-                <section className="top-row">
-                    {currentPage === 'Home' && <p>Welcome to the Home Page!</p>}
-                    {currentPage === 'Tasks' && (
-                        <div className="task-section">
-                            <h3>Tasks</h3>
-                            <ul>
-                                {[
-                                    { color: 'var(--task-green)' },
-                                    { color: 'var(--task-red)' },
-                                    { color: 'var(--task-blue)' },
-                                    { color: 'var(--task-purple)' },
-                                ].map((item, i) => (
-                                    <li key={`task-${i}`}>
-                                        Task {i + 1}
-                                        <hr style={{ borderColor: item.color }} />
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                    {currentPage === 'Calendar' && <p>Welcome to the Calendar Page!</p>}
-                    {currentPage === 'Notes' && (
-                        <div className="notes-box">
-                            <h4>Notes</h4>
-                            <ul>
-                                {Array.from({ length: 5 }, (_, i) => (
-                                    <li key={`note-${i}`}>Lorem ipsum placeholder text #{i + 1}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                    {currentPage === 'Settings' && <p>Welcome to the Settings Page!</p>}
-                </section>
-
-                <section className="bottom-row">
-                    {[1, 2].map((n) => (
-                        <div key={`deadline-box-${n}`} className="deadline-box">
-                            <h4>Deadlines</h4>
-                            <ul>
-                                {["03/11/25", "03/12/25", "03/13/25", "03/14/25"].map((date, i) => (
-                                    <li key={`deadline-${n}-${i}`}>Task {i + 1}: {date}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-
-                    <div className="notes-box">
-                        <h4>Notes</h4>
-                        <ul>
-                            {Array.from({ length: 5 }, (_, i) => (
-                                <li key={`note-${i}`}>Lorem ipsum placeholder text #{i + 1}</li>
-                            ))}
-                        </ul>
-                    </div>
-                </section>
-            </main>
+  return (
+    <div className={`app ${darkMode ? 'dark' : ''}`}>
+      {/* Header */}
+      <header className="header">
+        <div className="logo">
+          <h1>TaskFlow</h1>
         </div>
-    );
-}
+        
+        <nav className="nav">
+          <a href="#home">Home</a>
+          <a href="#calendar">Calendar</a>
+          <a href="#tasks">Tasks</a>
+          <a href="#settings">Settings</a>
+        </nav>
+
+        <div className="header-controls">
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            className="theme-toggle"
+          >
+            {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+          </button>
+          <div 
+            className="profile" 
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+          >
+            <FiUser size={20} />
+            {showProfileMenu && (
+              <div className="profile-menu">
+                <button className="profile-menu-item">
+                  <FiSettings /> Account Settings
+                </button>
+                <button className="profile-menu-item">
+                  <FiUser /> Profile
+                </button>
+                <button className="profile-menu-item">
+                  <FiSun /> Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Dashboard Stats */}
+        <div className="dashboard">
+          <div className="stats-card">
+            <h3>📅 Upcoming Tasks</h3>
+            <span className="accent-text">{tasks.filter(t => !t.completed).length}</span>
+          </div>
+          <div className="stats-card">
+            <h3>⚠️ Overdue Tasks</h3>
+            <span className="accent-text">0</span>
+          </div>
+          <div className="stats-card">
+            <h3>✅ Completed</h3>
+            <span className="accent-text">{tasks.filter(t => t.completed).length}</span>
+          </div>
+        </div>
+
+        {/* Task Management Section */}
+        <div className="task-section">
+          <div className="task-controls">
+            <input
+              type="text"
+              placeholder="Add new task..."
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && addTask()}
+              className="task-input"
+            />
+            <button onClick={addTask} className="add-button">
+              <FiPlus size={18} /> Add Task
+            </button>
+            
+            <div className="filter-group">
+              <select 
+                onChange={(e) => setFilter(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Tasks</option>
+                <option value="completed">Completed</option>
+                <option value="active">Active</option>
+              </select>
+              <select 
+                onChange={(e) => setSortBy(e.target.value)}
+                className="filter-select"
+              >
+                <option value="priority">Priority</option>
+                <option value="dueDate">Due Date</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
+          </div>
+
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="tasks">
+              {(provided) => (
+                <div 
+                  {...provided.droppableProps} 
+                  ref={provided.innerRef}
+                  className="task-list"
+                >
+                  {tasks
+                    .filter(task => 
+                      filter === 'completed' ? task.completed :
+                      filter === 'active' ? !task.completed : true
+                    )
+                    .sort((a, b) => {
+                      if (sortBy === 'priority') {
+                        const priorityOrder = { high: 1, medium: 2, low: 3 };
+                        return priorityOrder[a.priority] - priorityOrder[b.priority];
+                      }
+                      return a[sortBy].localeCompare(b[sortBy]);
+                    })
+                    .map((task, index) => (
+                      <Draggable 
+                        key={task.id} 
+                        draggableId={task.id} 
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`task-item ${snapshot.isDragging ? 'dragging' : ''}`}
+                          >
+                            <div className="task-checkbox">
+                              <input
+                                type="checkbox"
+                                checked={task.completed}
+                                onChange={() => toggleTask(task.id)}
+                              />
+                            </div>
+                            <div className="task-content">
+                              <span className={`task-text ${task.completed ? 'completed' : ''}`}>
+                                {task.text}
+                              </span>
+                              <div className="task-meta">
+                                {task.category && (
+                                  <span className="category-badge">
+                                    {task.category}
+                                  </span>
+                                )}
+                                {task.dueDate && (
+                                  <span className="due-date">
+                                    <FiCalendar size={14} /> {task.dueDate}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="task-actions">
+                              <FiEdit 
+                                className="action-icon" 
+                                onClick={() => setEditTask(task)}
+                              />
+                              <FiTrash 
+                                className="action-icon" 
+                                onClick={() => deleteTask(task.id)}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </div>
+
+        {/* Collaboration Panel */}
+        <div className="collaboration-panel">
+          <h3 className="panel-title">Team Members</h3>
+          {team.map(member => (
+            <div key={member.id} className="team-member">
+              <span className={`status ${member.online ? 'online' : ''}`}></span>
+              <span className="member-name">{member.name}</span>
+              <button className="share-button">
+                Share <FiUser size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-links">
+          <a href="#support">Support</a>
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#terms">Terms of Service</a>
+        </div>
+        <div className="social-media">
+          <span>Connect with us:</span>
+          <a href="#twitter">Twitter</a>
+          <a href="#linkedin">LinkedIn</a>
+          <a href="#facebook">Facebook</a>
+        </div>
+        <p className="copyright">
+          © 2023 TaskFlow. All rights reserved.
+        </p>
+      </footer>
+    </div>
+  );
+};
 
 export default Home;
-
-
-
