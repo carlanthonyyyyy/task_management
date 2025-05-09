@@ -1,69 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { 
-  FiPlus, 
-  FiBell, 
-  FiSettings, 
-  FiUser, 
-  FiSun, 
-  FiMoon, 
-  FiTrash, 
-  FiEdit, 
-  FiCalendar 
+import {
+  FiPlus,
+  FiBell,
+  FiSettings,
+  FiUser,
+  FiSun,
+  FiMoon,
+  FiTrash,
+  FiEdit,
+  FiCalendar
 } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
+  const navigate = useNavigate();
+
   const [darkMode, setDarkMode] = useState(false);
-  const [tasks, setTasks] = useState([]);
+  const [userTasks, setUserTasks] = useState({
+    john: [],
+    jane: [],
+    mike: []
+  });
   const [newTask, setNewTask] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
   const [editTask, setEditTask] = useState(null);
+  const [currentUser, setCurrentUser] = useState('john');
 
   const [team] = useState([
-    { id: 1, name: 'John Doe', online: true },
-    { id: 2, name: 'Jane Smith', online: false },
-    { id: 3, name: 'Mike Johnson', online: true }
+    { id: 'john', name: 'John Doe', online: true },
+    { id: 'jane', name: 'Jane Smith', online: false },
+    { id: 'mike', name: 'Mike Johnson', online: true }
   ]);
+
+  const tasks = userTasks[currentUser] || [];
+
+  const updateUserTasks = (newTasks) => {
+    setUserTasks(prev => ({
+      ...prev,
+      [currentUser]: newTasks
+    }));
+  };
 
   useEffect(() => {
     const sampleTasks = [
-      { 
-        id: '1', 
-        text: 'Complete project proposal', 
-        completed: false, 
-        dueDate: '2023-08-25', 
-        priority: 'high', 
-        category: 'Work' 
-      },
-      { 
-        id: '2', 
-        text: 'Team meeting', 
-        completed: false, 
-        dueDate: '2023-08-26', 
-        priority: 'medium', 
-        category: 'Meeting' 
-      },
-      { 
-        id: '3', 
-        text: 'Review code', 
-        completed: true, 
-        dueDate: '2023-08-24', 
-        priority: 'low', 
-        category: 'Development' 
-      }
+      { id: '1', text: 'Complete project proposal', completed: false, dueDate: '2023-08-25', priority: 'high', category: 'Work' },
+      { id: '2', text: 'Team meeting', completed: false, dueDate: '2023-08-26', priority: 'medium', category: 'Meeting' },
+      { id: '3', text: 'Review code', completed: true, dueDate: '2023-08-24', priority: 'low', category: 'Development' }
     ];
-    setTasks(sampleTasks);
-  }, []);
+    updateUserTasks(sampleTasks);
+  }, [currentUser]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
     const items = Array.from(tasks);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    setTasks(items);
+    updateUserTasks(items);
   };
 
   const addTask = () => {
@@ -76,68 +72,54 @@ const Home = () => {
         priority: 'medium',
         category: 'General'
       };
-      setTasks([...tasks, task]);
+      updateUserTasks([...tasks, task]);
       setNewTask('');
     }
   };
 
   const deleteTask = (taskId) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+    updateUserTasks(tasks.filter(task => task.id !== taskId));
   };
 
   const toggleTask = (taskId) => {
-    setTasks(tasks.map(task => 
+    updateUserTasks(tasks.map(task =>
       task.id === taskId ? { ...task, completed: !task.completed } : task
     ));
   };
 
+  const handleLogout = () => {
+    // Optional: Clear auth data here if needed
+    navigate('/');
+  };
+
   return (
     <div className={`app ${darkMode ? 'dark' : ''}`}>
-      {/* Header */}
       <header className="header">
-        <div className="logo">
-          <h1>TaskFlow</h1>
-        </div>
-        
+        <div className="logo"><h1>TaskFlow</h1></div>
         <nav className="nav">
           <a href="#home">Home</a>
           <a href="#calendar">Calendar</a>
           <a href="#tasks">Tasks</a>
           <a href="#settings">Settings</a>
         </nav>
-
         <div className="header-controls">
-          <button 
-            onClick={() => setDarkMode(!darkMode)}
-            className="theme-toggle"
-          >
+          <button onClick={() => setDarkMode(!darkMode)} className="theme-toggle">
             {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
           </button>
-          <div 
-            className="profile" 
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-          >
+          <div className="profile" onClick={() => setShowProfileMenu(!showProfileMenu)}>
             <FiUser size={20} />
             {showProfileMenu && (
               <div className="profile-menu">
-                <button className="profile-menu-item">
-                  <FiSettings /> Account Settings
-                </button>
-                <button className="profile-menu-item">
-                  <FiUser /> Profile
-                </button>
-                <button className="profile-menu-item">
-                  <FiSun /> Logout
-                </button>
+                <button className="profile-menu-item"><FiSettings /> Account Settings</button>
+                <button className="profile-menu-item"><FiUser /> Profile</button>
+                <button className="profile-menu-item" onClick={handleLogout}><FiSun /> Logout</button>
               </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="main-content">
-        {/* Dashboard Stats */}
         <div className="dashboard">
           <div className="stats-card">
             <h3>📅 Upcoming Tasks</h3>
@@ -153,7 +135,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Task Management Section */}
         <div className="task-section">
           <div className="task-controls">
             <input
@@ -167,23 +148,21 @@ const Home = () => {
             <button onClick={addTask} className="add-button">
               <FiPlus size={18} /> Add Task
             </button>
-            
             <div className="filter-group">
-              <select 
-                onChange={(e) => setFilter(e.target.value)}
-                className="filter-select"
-              >
+              <select onChange={(e) => setFilter(e.target.value)} className="filter-select">
                 <option value="all">All Tasks</option>
                 <option value="completed">Completed</option>
                 <option value="active">Active</option>
               </select>
-              <select 
-                onChange={(e) => setSortBy(e.target.value)}
-                className="filter-select"
-              >
+              <select onChange={(e) => setSortBy(e.target.value)} className="filter-select">
                 <option value="priority">Priority</option>
                 <option value="dueDate">Due Date</option>
                 <option value="category">Category</option>
+              </select>
+              <select onChange={e => setCurrentUser(e.target.value)} value={currentUser} className="filter-select">
+                <option value="john">John Doe</option>
+                <option value="jane">Jane Smith</option>
+                <option value="mike">Mike Johnson</option>
               </select>
             </div>
           </div>
@@ -191,16 +170,9 @@ const Home = () => {
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="tasks">
               {(provided) => (
-                <div 
-                  {...provided.droppableProps} 
-                  ref={provided.innerRef}
-                  className="task-list"
-                >
+                <div {...provided.droppableProps} ref={provided.innerRef} className="task-list">
                   {tasks
-                    .filter(task => 
-                      filter === 'completed' ? task.completed :
-                      filter === 'active' ? !task.completed : true
-                    )
+                    .filter(task => filter === 'completed' ? task.completed : filter === 'active' ? !task.completed : true)
                     .sort((a, b) => {
                       if (sortBy === 'priority') {
                         const priorityOrder = { high: 1, medium: 2, low: 3 };
@@ -209,11 +181,7 @@ const Home = () => {
                       return a[sortBy].localeCompare(b[sortBy]);
                     })
                     .map((task, index) => (
-                      <Draggable 
-                        key={task.id} 
-                        draggableId={task.id} 
-                        index={index}
-                      >
+                      <Draggable key={task.id} draggableId={task.id} index={index}>
                         {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}
@@ -229,31 +197,15 @@ const Home = () => {
                               />
                             </div>
                             <div className="task-content">
-                              <span className={`task-text ${task.completed ? 'completed' : ''}`}>
-                                {task.text}
-                              </span>
+                              <span className={`task-text ${task.completed ? 'completed' : ''}`}>{task.text}</span>
                               <div className="task-meta">
-                                {task.category && (
-                                  <span className="category-badge">
-                                    {task.category}
-                                  </span>
-                                )}
-                                {task.dueDate && (
-                                  <span className="due-date">
-                                    <FiCalendar size={14} /> {task.dueDate}
-                                  </span>
-                                )}
+                                {task.category && <span className="category-badge">{task.category}</span>}
+                                {task.dueDate && <span className="due-date"><FiCalendar size={14} /> {task.dueDate}</span>}
                               </div>
                             </div>
                             <div className="task-actions">
-                              <FiEdit 
-                                className="action-icon" 
-                                onClick={() => setEditTask(task)}
-                              />
-                              <FiTrash 
-                                className="action-icon" 
-                                onClick={() => deleteTask(task.id)}
-                              />
+                              <FiEdit className="action-icon" onClick={() => setEditTask(task)} />
+                              <FiTrash className="action-icon" onClick={() => deleteTask(task.id)} />
                             </div>
                           </div>
                         )}
@@ -266,22 +218,18 @@ const Home = () => {
           </DragDropContext>
         </div>
 
-        {/* Collaboration Panel */}
         <div className="collaboration-panel">
           <h3 className="panel-title">Team Members</h3>
           {team.map(member => (
             <div key={member.id} className="team-member">
               <span className={`status ${member.online ? 'online' : ''}`}></span>
               <span className="member-name">{member.name}</span>
-              <button className="share-button">
-                Share <FiUser size={14} />
-              </button>
+              <button className="share-button">Share <FiUser size={14} /></button>
             </div>
           ))}
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footer-links">
           <a href="#support">Support</a>
@@ -294,9 +242,7 @@ const Home = () => {
           <a href="#linkedin">LinkedIn</a>
           <a href="#facebook">Facebook</a>
         </div>
-        <p className="copyright">
-          © 2023 TaskFlow. All rights reserved.
-        </p>
+        <p className="copyright">© 2023 TaskFlow. All rights reserved.</p>
       </footer>
     </div>
   );

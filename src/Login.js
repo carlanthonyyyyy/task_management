@@ -13,7 +13,7 @@ function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert('Logged in successfully!');
-      navigate('/Home'); // or wherever you want to redirect
+      navigate('/home'); // 👈 fixed to match route path
     } catch (error) {
       alert(error.message);
     }
