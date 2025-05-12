@@ -11,8 +11,9 @@ import {
   FiCalendar
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
+import { ref, get } from 'firebase/database';
+import { onAuthStateChanged } from 'firebase/auth';
 import './Home.css';
 
 const Home = () => {
@@ -25,32 +26,35 @@ const Home = () => {
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
   const [editTask, setEditTask] = useState(null);
-  const [currentUserName, setCurrentUserName] = useState('User');
+
+  const [currentUserName, setCurrentUserName] = useState('');
+  const [loading, setLoading] = useState(true); // new
+
 
   useEffect(() => {
-    const storedName = localStorage.getItem('userFullName');
-    if (storedName) {
-      setCurrentUserName(storedName);
-    } else {
-      const fetchUserName = async () => {
-        const user = auth.currentUser;
-        if (user) {
-          const docRef = doc(db, 'users', user.uid);
-          const docSnap = await getDoc(docRef);
-
-          if (docSnap.exists()) {
-            const userData = docSnap.data();
-            const fullName = `${userData.firstName} ${userData.lastName}`;
-            setCurrentUserName(fullName);
-            localStorage.setItem('userFullName', fullName);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const snapshot = await get(ref(db, 'users/' + user.uid));
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            setCurrentUserName(`${data.firstName} ${data.lastName}`);
           } else {
-            console.log('No such user data!');
+            setCurrentUserName('User');
           }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          setCurrentUserName('User');
         }
-      };
-      fetchUserName();
-    }
-  }, []);
+        setLoading(false); // ✅ only after user data is fetched
+      } else {
+        navigate('/'); // 🚪 redirect to login
+        // ❌ don't call setLoading here or it will flash "Loading..." indefinitely
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);  
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -86,7 +90,7 @@ const Home = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userFullName');
+    localStorage.clear(); // ✅ ensure localStorage is cleared on logout
     navigate('/');
   };
 
@@ -119,7 +123,9 @@ const Home = () => {
 
       <main className="main-content">
         <div className="greeting-note">
-          <h2>Hi, {currentUserName}</h2>
+          <h2>
+            {loading ? 'Loading...' : `Hi, ${currentUserName}`}
+          </h2>
         </div>
 
         <div className="dashboard">
@@ -144,7 +150,7 @@ const Home = () => {
               placeholder="Add new task..."
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addTask()}
+              onKeyDown={(e) => e.key === 'Enter' && addTask()}
               className="task-input"
             />
             <button onClick={addTask} className="add-button">
@@ -169,13 +175,20 @@ const Home = () => {
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef} className="task-list">
                   {tasks
-                    .filter(task => filter === 'completed' ? task.completed : filter === 'active' ? !task.completed : true)
+                    .filter(task => {
+                      if (filter === 'completed') return task.completed;
+                      if (filter === 'active') return !task.completed;
+                      return true;
+                    })
                     .sort((a, b) => {
                       if (sortBy === 'priority') {
                         const priorityOrder = { high: 1, medium: 2, low: 3 };
                         return priorityOrder[a.priority] - priorityOrder[b.priority];
+                      } else {
+                        const valA = a[sortBy] || '';
+                        const valB = b[sortBy] || '';
+                        return valA.localeCompare(valB);
                       }
-                      return a[sortBy].localeCompare(b[sortBy]);
                     })
                     .map((task, index) => (
                       <Draggable key={task.id} draggableId={task.id} index={index}>

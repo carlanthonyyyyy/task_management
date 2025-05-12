@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { auth, db } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { ref, set } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
@@ -14,17 +14,17 @@ function Signup() {
 
   const handleSignUp = async () => {
     try {
+      // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      const uid = user.uid;
 
-      // Save user data to Firestore
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
+      // Save user data in Realtime Database under the UID
+      await set(ref(db, 'users/' + uid), {
+        id: uid,
         firstName,
         lastName,
-        createdAt: new Date(),
-        role: 'user'
+        email
       });
 
       // Save full name to localStorage
@@ -40,7 +40,6 @@ function Signup() {
 
   return (
     <div className="container">
-      {/* Left Panel */}
       <div className="left-panel">
         <div className="logo">
           <h1>TMA</h1>
@@ -79,7 +78,6 @@ function Signup() {
         </div>
       </div>
 
-      {/* Right Panel */}
       <div className="right-panel">
         <div className="help-box">
           <h2>JOIN US</h2>

@@ -15,14 +15,16 @@ export const login = async (email, password) => {
     }
 
     const userData = userDocSnap.data();
-    const fullName = `${userData.firstName} ${userData.lastName}`;
-    localStorage.setItem('userFullName', fullName); // <-- Set full name here
+    const firstName = userData.firstName || "";
+    const lastName = userData.lastName || "";
+    const fullName = `${firstName} ${lastName}`.trim();
+
+    localStorage.setItem("userFullName", fullName); // Store for greeting
 
     return {
         uid: user.uid,
         email: user.email,
-        firstName: userData.firstName || "",
-        lastName: userData.lastName || "",
-        role: userData.role || "user",
+        firstName,
+        lastName,
     };
 };
