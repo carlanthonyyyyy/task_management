@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
-import { ref, get } from 'firebase/database';
+import { ref, get, set, push, onValue } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import './Home.css';
 
@@ -42,10 +42,18 @@ const Home = () => {
           } else {
             setCurrentUserName('User');
           }
+
+          const tasksRef = ref(db, `users/${user.uid}/tasks`);
+          onValue(tasksRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            const loadedTasks = Object.values(data);
+            setTasks(loadedTasks);
+          });
+
         } catch (error) {
-          console.error('Error fetching user data:', error);
+          console.error('Error fetching user data or tasks:', error);
           setCurrentUserName('User');
-        }
+        }        
         setLoading(false); // ✅ only after user data is fetched
       } else {
         navigate('/'); // 🚪 redirect to login
@@ -64,8 +72,11 @@ const Home = () => {
     setTasks(items);
   };
 
-  const addTask = () => {
+  const addTask = async () => {
     if (newTask.trim()) {
+      const user = auth.currentUser;
+      if (!user) return;
+
       const task = {
         id: Date.now().toString(),
         text: newTask,
@@ -74,20 +85,48 @@ const Home = () => {
         priority: 'medium',
         category: 'General'
       };
-      setTasks([...tasks, task]);
-      setNewTask('');
+
+      try {
+        const taskRef = ref(db, `users/${user.uid}/tasks/${task.id}`);
+        await set(taskRef, task);
+        setNewTask('');        
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
     }
   };
+  
 
-  const deleteTask = (taskId) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+  const deleteTask = async (taskId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+      await set(ref(db, `users/${user.uid}/tasks/${taskId}`), null);
+      setTasks(tasks.filter(task => task.id !== taskId));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
+  
 
-  const toggleTask = (taskId) => {
-    setTasks(tasks.map(task =>
+  const toggleTask = async (taskId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const updatedTasks = tasks.map(task =>
       task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    );
+
+    const updatedTask = updatedTasks.find(task => task.id === taskId);
+    try {
+      await set(ref(db, `users/${user.uid}/tasks/${taskId}`), updatedTask);
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
+  
 
   const handleLogout = () => {
     localStorage.clear(); // ✅ ensure localStorage is cleared on logout
