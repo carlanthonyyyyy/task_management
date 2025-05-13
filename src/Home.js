@@ -14,12 +14,14 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
 import { ref, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
+import { set, push, ref as dbRef, onValue, remove, update } from 'firebase/database';
 import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
 
   const [darkMode, setDarkMode] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
   const [newDueDate, setNewDueDate] = useState('');
@@ -34,6 +36,8 @@ const Home = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setUserId(user.uid); // store userId
+
         try {
           const snapshot = await get(ref(db, 'users/' + user.uid));
           if (snapshot.exists()) {
@@ -46,6 +50,17 @@ const Home = () => {
           console.error('Error fetching user data:', error);
           setCurrentUserName('User');
         }
+
+        // Fetch user tasks
+        const tasksRef = dbRef(db, `tasks/${user.uid}`);
+        onValue(tasksRef, (snapshot) => {
+          const data = snapshot.val();
+          const loadedTasks = data
+            ? Object.entries(data).map(([key, val]) => ({ ...val, id: key }))
+            : [];
+          setTasks(loadedTasks);
+        });
+
         setLoading(false);
       } else {
         navigate('/');
@@ -54,6 +69,7 @@ const Home = () => {
 
     return () => unsubscribe();
   }, [navigate]);
+  
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -64,31 +80,39 @@ const Home = () => {
   };
 
   const addTask = () => {
-    if (newTask.trim()) {
-      const task = {
-        id: Date.now().toString(),
+    if (newTask.trim() && userId) {
+      const newTaskData = {
         text: newTask,
         completed: false,
         dueDate: newDueDate && newDueTime ? `${newDueDate} ${newDueTime}` : newDueDate,
         priority: 'medium',
-        category: 'General'
+        category: 'General',
       };
-      setTasks([...tasks, task]);
-      setNewTask('');
-      setNewDueDate('');
-      setNewDueTime('');
+
+      const newTaskRef = dbRef(db, `tasks/${userId}/test-task`);
+      set(newTaskRef, newTaskData)
+        .then(() => console.log('Task saved!'))
+        .catch((e) => console.error(e));
+
     }
-  };
+  };  
 
   const deleteTask = (taskId) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
+    if (userId) {
+      remove(dbRef(db, `tasks/${userId}/${taskId}`));
+    }
   };
+  
 
   const toggleTask = (taskId) => {
-    setTasks(tasks.map(task =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    const updatedTask = tasks.find(task => task.id === taskId);
+    if (updatedTask && userId) {
+      update(dbRef(db, `tasks/${userId}/${taskId}`), {
+        completed: !updatedTask.completed,
+      });
+    }
   };
+  
 
   const handleLogout = () => {
     localStorage.clear();
