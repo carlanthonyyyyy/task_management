@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
-import { ref, get, set, push, onValue } from 'firebase/database';
+import { ref, get } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
 import './Home.css';
 
@@ -22,14 +22,14 @@ const Home = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
+  const [newDueDate, setNewDueDate] = useState('');
+  const [newDueTime, setNewDueTime] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
   const [editTask, setEditTask] = useState(null);
-
   const [currentUserName, setCurrentUserName] = useState('');
-  const [loading, setLoading] = useState(true); // new
-
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -42,27 +42,18 @@ const Home = () => {
           } else {
             setCurrentUserName('User');
           }
-
-          const tasksRef = ref(db, `users/${user.uid}/tasks`);
-          onValue(tasksRef, (snapshot) => {
-            const data = snapshot.val() || {};
-            const loadedTasks = Object.values(data);
-            setTasks(loadedTasks);
-          });
-
         } catch (error) {
-          console.error('Error fetching user data or tasks:', error);
+          console.error('Error fetching user data:', error);
           setCurrentUserName('User');
-        }        
-        setLoading(false); // ✅ only after user data is fetched
+        }
+        setLoading(false);
       } else {
-        navigate('/'); // 🚪 redirect to login
-        // ❌ don't call setLoading here or it will flash "Loading..." indefinitely
+        navigate('/');
       }
     });
 
     return () => unsubscribe();
-  }, [navigate]);  
+  }, [navigate]);
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -72,64 +63,35 @@ const Home = () => {
     setTasks(items);
   };
 
-  const addTask = async () => {
+  const addTask = () => {
     if (newTask.trim()) {
-      const user = auth.currentUser;
-      if (!user) return;
-
       const task = {
         id: Date.now().toString(),
         text: newTask,
         completed: false,
-        dueDate: '',
+        dueDate: newDueDate && newDueTime ? `${newDueDate} ${newDueTime}` : newDueDate,
         priority: 'medium',
         category: 'General'
       };
-
-      try {
-        const taskRef = ref(db, `users/${user.uid}/tasks/${task.id}`);
-        await set(taskRef, task);
-        setNewTask('');        
-      } catch (error) {
-        console.error("Error adding task:", error);
-      }
+      setTasks([...tasks, task]);
+      setNewTask('');
+      setNewDueDate('');
+      setNewDueTime('');
     }
   };
-  
 
-  const deleteTask = async (taskId) => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    try {
-      await set(ref(db, `users/${user.uid}/tasks/${taskId}`), null);
-      setTasks(tasks.filter(task => task.id !== taskId));
-    } catch (error) {
-      console.error("Error deleting task:", error);
-    }
+  const deleteTask = (taskId) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
   };
-  
 
-  const toggleTask = async (taskId) => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const updatedTasks = tasks.map(task =>
+  const toggleTask = (taskId) => {
+    setTasks(tasks.map(task =>
       task.id === taskId ? { ...task, completed: !task.completed } : task
-    );
-
-    const updatedTask = updatedTasks.find(task => task.id === taskId);
-    try {
-      await set(ref(db, `users/${user.uid}/tasks/${taskId}`), updatedTask);
-      setTasks(updatedTasks);
-    } catch (error) {
-      console.error("Error updating task:", error);
-    }
+    ));
   };
-  
 
   const handleLogout = () => {
-    localStorage.clear(); // ✅ ensure localStorage is cleared on logout
+    localStorage.clear();
     navigate('/');
   };
 
@@ -184,14 +146,28 @@ const Home = () => {
 
         <div className="task-section">
           <div className="task-controls">
-            <input
-              type="text"
-              placeholder="Add new task..."
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addTask()}
-              className="task-input"
-            />
+            <div className="task-input-group">
+              <input
+                type="text"
+                placeholder="Add new task..."
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addTask()}
+                className="task-input"
+              />
+              <input
+                type="date"
+                value={newDueDate}
+                onChange={(e) => setNewDueDate(e.target.value)}
+                className="due-date-input"
+              />
+              <input
+                type="time"
+                value={newDueTime}
+                onChange={(e) => setNewDueTime(e.target.value)}
+                className="due-time-input"
+              />
+            </div>
             <button onClick={addTask} className="add-button">
               <FiPlus size={18} /> Add Task
             </button>
