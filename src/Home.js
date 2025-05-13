@@ -1,20 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
-  FiPlus,
-  FiSun,
-  FiMoon,
-  FiSettings,
-  FiUser,
-  FiTrash,
-  FiEdit,
-  FiCalendar
+  FiPlus, FiSun, FiMoon, FiSettings, FiUser, FiTrash, FiEdit, FiCalendar
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
-import { ref, get } from 'firebase/database';
+import { ref, get, set, push, onValue, remove, update } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
-import { set, push, ref as dbRef, onValue, remove, update } from 'firebase/database';
 import './Home.css';
 
 const Home = () => {
@@ -36,8 +28,7 @@ const Home = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserId(user.uid); // store userId
-
+        setUserId(user.uid);
         try {
           const snapshot = await get(ref(db, 'users/' + user.uid));
           if (snapshot.exists()) {
@@ -51,8 +42,7 @@ const Home = () => {
           setCurrentUserName('User');
         }
 
-        // Fetch user tasks
-        const tasksRef = dbRef(db, `tasks/${user.uid}`);
+        const tasksRef = ref(db, `tasks/${user.uid}`);
         onValue(tasksRef, (snapshot) => {
           const data = snapshot.val();
           const loadedTasks = data
@@ -69,7 +59,6 @@ const Home = () => {
 
     return () => unsubscribe();
   }, [navigate]);
-  
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -89,30 +78,32 @@ const Home = () => {
         category: 'General',
       };
 
-      const newTaskRef = dbRef(db, `tasks/${userId}/test-task`);
+      const newTaskRef = push(ref(db, `tasks/${userId}`));
       set(newTaskRef, newTaskData)
-        .then(() => console.log('Task saved!'))
+        .then(() => {
+          console.log('Task saved!');
+          setNewTask('');
+          setNewDueDate('');
+          setNewDueTime('');
+        })
         .catch((e) => console.error(e));
-
     }
-  };  
+  };
 
   const deleteTask = (taskId) => {
     if (userId) {
-      remove(dbRef(db, `tasks/${userId}/${taskId}`));
+      remove(ref(db, `tasks/${userId}/${taskId}`));
     }
   };
-  
 
   const toggleTask = (taskId) => {
     const updatedTask = tasks.find(task => task.id === taskId);
     if (updatedTask && userId) {
-      update(dbRef(db, `tasks/${userId}/${taskId}`), {
+      update(ref(db, `tasks/${userId}/${taskId}`), {
         completed: !updatedTask.completed,
       });
     }
   };
-  
 
   const handleLogout = () => {
     localStorage.clear();
