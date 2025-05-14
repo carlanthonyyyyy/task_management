@@ -116,7 +116,7 @@ const Home = () => {
       <header className="header">
         <div className="logo"><h1>TaskFlow</h1></div>
         <nav className="nav">
-          <Link to="/">Home</Link>
+          <Link to="/home">Home</Link>
           <Link to="/calendar">Calendar</Link>
           <Link to="/tasks">Tasks</Link> {/* Make this link navigate to /tasks */}
           <Link to="/settings">Settings</Link>
