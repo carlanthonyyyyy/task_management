@@ -1,0 +1,44 @@
+.task-component {
+  padding: 1rem;
+}
+
+.task-filter-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.task-actions .action-icon {
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+
+.task-meta {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.due-date {
+  margin-left: 10px;
+}

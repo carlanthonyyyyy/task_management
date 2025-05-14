@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { auth, db } from './firebase';
 import { ref, get, set, push, onValue, remove, update } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
+import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
@@ -115,10 +116,10 @@ const Home = () => {
       <header className="header">
         <div className="logo"><h1>TaskFlow</h1></div>
         <nav className="nav">
-          <a href="#home">Home</a>
-          <a href="#calendar">Calendar</a>
-          <a href="#tasks">Tasks</a>
-          <a href="#settings">Settings</a>
+          <Link to="/">Home</Link>
+          <Link to="/calendar">Calendar</Link>
+          <Link to="/tasks">Tasks</Link> {/* Make this link navigate to /tasks */}
+          <Link to="/settings">Settings</Link>
         </nav>
         <div className="header-controls">
           <button onClick={() => setDarkMode(!darkMode)} className="theme-toggle">
