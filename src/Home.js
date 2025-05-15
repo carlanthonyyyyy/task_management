@@ -1,90 +1,133 @@
 import React, { useState } from 'react';
-import { auth } from './firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
-import './App.css';
+import './Home.css';
 
-function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
+function Home() {
+    const [currentPage, setCurrentPage] = useState('Home');
 
-  const handleLogin = async () => {
-    // Input validation
-    if (!email && !password) {
-      alert('Please enter your email and password.');
-      return;
-    } else if (!email) {
-      alert('Please enter your email.');
-      return;
-    } else if (!password) {
-      alert('Please enter your password.');
-      return;
-    }
+    const handleButtonClick = (page) => {
+        setCurrentPage(page);
+        let url = '';
 
-    // Firebase login
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert('Logged in successfully!');
-      navigate('/Home');
-    } catch (error) {
-      alert(error.message); // Keep default Firebase message
-    }
-  };
+        // DITO YUNG MGA URL
+        switch (page) {
+            case 'Home':
+                url = '/home';
+                break;  
+            case 'Tasks':
+                url = '/tasks';
+                break;  
+            case 'Calendar':
+                url = '/calendar';
+                break;
+            case 'Notes':
+                url = '/notes';
+                break;  
+            case 'Settings':
+                url = '/settings';
+                break; 
+            default:
+                url = '/';
+        }
 
-  return (
-    <div className="container">
-      {/* Left Panel */}
-      <div className="left-panel">
-        <div className="logo">
-          <h1>TMA</h1>
-          <p>Task Management System</p>
+        console.log(`Navigating to: ${url}`);
+        
+        window.location.href = url;
+    };
+
+    return (
+        <div className="home-container">
+            <nav className="sidebar">
+                {[
+                    { icon: '🏠', label: 'Home' },
+                    { icon: '📋', label: 'Tasks' },
+                    { icon: '🗓️', label: 'Calendar' },
+                    { icon: '📝', label: 'Notes' },
+                    { icon: '⚙️', label: 'Settings' },
+                ].map((item) => (
+                    <button
+                        key={item.label}
+                        className="nav-icon"
+                        aria-label={item.label}
+                        title={item.label}
+                        onClick={() => handleButtonClick(item.label)} // Handles button click
+                    >
+                        {item.icon}
+                    </button>
+                ))}
+            </nav>
+
+            <main className="main-content" role="main">
+                <header className="header">
+                    <h1>TMA</h1>
+                    <p>Task Management System</p>
+                </header>
+
+                <section className="welcome-title">
+                    <h2>Welcome, User!</h2>
+                </section>
+
+                <section className="top-row">
+                    {currentPage === 'Home' && <p>Welcome to the Home Page!</p>}
+                    {currentPage === 'Tasks' && (
+                        <div className="task-section">
+                            <h3>Tasks</h3>
+                            <ul>
+                                {[
+                                    { color: 'var(--task-green)' },
+                                    { color: 'var(--task-red)' },
+                                    { color: 'var(--task-blue)' },
+                                    { color: 'var(--task-purple)' },
+                                ].map((item, i) => (
+                                    <li key={`task-${i}`}>
+                                        Task {i + 1}
+                                        <hr style={{ borderColor: item.color }} />
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {currentPage === 'Calendar' && <p>Welcome to the Calendar Page!</p>}
+                    {currentPage === 'Notes' && (
+                        <div className="notes-box">
+                            <h4>Notes</h4>
+                            <ul>
+                                {Array.from({ length: 5 }, (_, i) => (
+                                    <li key={`note-${i}`}>Lorem ipsum placeholder text #{i + 1}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    {currentPage === 'Settings' && <p>Welcome to the Settings Page!</p>}
+                </section>
+
+                <section className="bottom-row">
+                    {[1, 2].map((n) => (
+                        <div key={`deadline-box-${n}`} className="deadline-box">
+                            <h4>Deadlines</h4>
+                            <ul>
+                                {["03/11/25", "03/12/25", "03/13/25", "03/14/25"].map((date, i) => (
+                                    <li key={`deadline-${n}-${i}`}>Task {i + 1}: {date}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+
+                    <div className="notes-box">
+                        <h4>Notes</h4>
+                        <ul>
+                            {Array.from({ length: 5 }, (_, i) => (
+                                <li key={`note-${i}`}>Lorem ipsum placeholder text #{i + 1}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+            </main>
         </div>
-        <div className="login-box">
-          <h2>LOG IN</h2>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div className="auth-buttons">
-            <button onClick={handleLogin}>LOG IN</button>
-            <button onClick={() => navigate('/signup')}>SIGN UP</button>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel */}
-      <div className="right-panel">
-        <div className="help-box">
-          <h2>NEED HELP?</h2>
-          <p>CREATE A FREE ACCOUNT TO ACCESS THE WEBSITE NOW</p>
-          <div className="help-icons">
-            <div className="icon-box" />
-            <div className="icon-box" />
-            <div className="icon-box" />
-            <div className="icon-box" />
-            <div className="icon-box" />
-          </div>
-        </div>
-        <div className="contact-info">
-          <p><strong>FACEBOOK:</strong> TMA PH</p>
-          <p><strong>X:</strong> @TMAPH</p>
-          <p><strong>INSTAGRAM:</strong> TMA_PH</p>
-          <p><strong>CONTACT NO:</strong> 0945-876-9089</p>
-          <p><strong>EMAIL:</strong> TMAPH@BUSINESS.COM</p>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
 
-export default Login;
+export default Home;
+
+
+
 
