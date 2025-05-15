@@ -41,34 +41,60 @@ html,
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: 100%;
+  max-width: 320px;
 }
 
 .login-box h2 {
-  font-size: 18px;
+  font-size: 20px;
   margin-bottom: 20px;
 }
 
+/* Form layout */
+.login-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.login-box label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
 .login-box input {
-  margin-bottom: 10px;
   padding: 8px 10px;
-  width: 250px;
   border: none;
   background-color: #ddd;
   border-radius: 5px;
   font-size: 14px;
+  width: 100%;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
+.login-box input:focus {
+  outline: none;
+  background-color: #e6e6e6;
+  box-shadow: 0 0 0 2px #3f8d66;
+}
+
+/* Buttons */
 .auth-buttons {
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 }
 
 .auth-buttons button {
-  padding: 6px 14px;
+  padding: 8px 16px;
   background-color: #eee;
   border: 1px solid #ccc;
   font-weight: bold;
+  font-size: 14px;
   cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s;
 }
 
 .auth-buttons button:hover {
@@ -119,9 +145,15 @@ html,
 .contact-info p {
   margin: 4px 0;
 }
+
+/* Error Message */
 .error-message {
   color: red;
-  font-weight: bold;
-  margin-top: 10px;
+  background-color: #ffe6e6;
+  border: 1px solid red;
+  padding: 8px 12px;
+  border-radius: 4px;
   font-size: 0.95rem;
+  font-weight: bold;
 }
+
