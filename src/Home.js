@@ -3,11 +3,10 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
   FiPlus, FiSun, FiMoon, FiSettings, FiUser, FiTrash, FiEdit, FiCalendar
 } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { auth, db } from './firebase';
 import { ref, get, set, push, onValue, remove, update } from 'firebase/database';
 import { onAuthStateChanged } from 'firebase/auth';
-import { Link } from 'react-router-dom';
 import './Home.css';
 
 const Home = () => {
@@ -23,6 +22,9 @@ const Home = () => {
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
   const [editTask, setEditTask] = useState(null);
+  const [editedText, setEditedText] = useState('');
+  const [editedDueDate, setEditedDueDate] = useState('');
+  const [editedDueTime, setEditedDueTime] = useState('');
   const [currentUserName, setCurrentUserName] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +33,7 @@ const Home = () => {
       if (user) {
         setUserId(user.uid);
         try {
-          const snapshot = await get(ref(db, 'users/' + user.uid));
+          const snapshot = await get(ref(db, `users/${user.uid}`));
           if (snapshot.exists()) {
             const data = snapshot.val();
             setCurrentUserName(`${data.firstName} ${data.lastName}`);
@@ -82,7 +84,6 @@ const Home = () => {
       const newTaskRef = push(ref(db, `tasks/${userId}`));
       set(newTaskRef, newTaskData)
         .then(() => {
-          console.log('Task saved!');
           setNewTask('');
           setNewDueDate('');
           setNewDueTime('');
@@ -106,6 +107,51 @@ const Home = () => {
     }
   };
 
+  const startEditing = (task) => {
+    setEditTask(task);
+    setEditedText(task.text);
+    // Extract due date and due time separately
+    if (task.dueDate) {
+      const [datePart, timePart] = task.dueDate.split(' ');
+      setEditedDueDate(datePart || '');
+      setEditedDueTime(timePart || '');
+    } else {
+      setEditedDueDate('');
+      setEditedDueTime('');
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditTask(null);
+    setEditedText('');
+    setEditedDueDate('');
+    setEditedDueTime('');
+  };
+
+  const saveEditedTask = (taskId) => {
+    if (editedText.trim() && userId) {
+      const dueDateTime = editedDueDate
+        ? editedDueTime
+          ? `${editedDueDate} ${editedDueTime}`
+          : editedDueDate
+        : '';
+
+      update(ref(db, `tasks/${userId}/${taskId}`), {
+        text: editedText,
+        dueDate: dueDateTime,
+      })
+        .then(() => {
+          setEditTask(null);
+          setEditedText('');
+          setEditedDueDate('');
+          setEditedDueTime('');
+        })
+        .catch((error) => {
+          console.error('Failed to update task:', error);
+        });
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate('/');
@@ -117,8 +163,8 @@ const Home = () => {
         <div className="logo"><h1>TaskFlow</h1></div>
         <nav className="nav">
           <Link to="/home">Home</Link>
-          <Link to="/calendar">Calendar</Link> {/* Navigate to Calendar.js */}
-          <Link to="/tasks">Tasks</Link> {/* Make this link navigate to /tasks */}
+          <Link to="/calendar">Calendar</Link>
+          <Link to="/tasks">Tasks</Link>
           <Link to="/settings">Settings</Link>
         </nav>
         <div className="header-controls">
@@ -238,16 +284,54 @@ const Home = () => {
                               />
                             </div>
                             <div className="task-content">
-                              <span className={`task-text ${task.completed ? 'completed' : ''}`}>{task.text}</span>
-                              <div className="task-meta">
-                                {task.category && <span className="category-badge">{task.category}</span>}
-                                {task.dueDate && <span className="due-date"><FiCalendar size={14} /> {task.dueDate}</span>}
+                              {editTask && editTask.id === task.id ? (
+                                <>
+                                  <input
+                                    className="task-edit-input"
+                                    type="text"
+                                    value={editedText}
+                                    onChange={(e) => setEditedText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') saveEditedTask(task.id);
+                                      if (e.key === 'Escape') cancelEdit();
+                                    }}
+                                    autoFocus
+                                  />
+                                  <div className="edit-due-date-time">
+                                    <input
+                                      type="date"
+                                      value={editedDueDate}
+                                      onChange={(e) => setEditedDueDate(e.target.value)}
+                                    />
+                                    <input
+                                      type="time"
+                                      value={editedDueTime}
+                                      onChange={(e) => setEditedDueTime(e.target.value)}
+                                    />
+                                  </div>
+                                  <div className="edit-buttons">
+                                    <button onClick={() => saveEditedTask(task.id)}>Save</button>
+                                    <button onClick={cancelEdit}>Cancel</button>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <span className={`task-text ${task.completed ? 'completed' : ''}`}>
+                                    {task.text}
+                                  </span>
+                                  <div className="task-meta">
+                                    {task.category && <span className="category-badge">{task.category}</span>}
+                                    {task.dueDate && <span className="due-date"><FiCalendar size={14} /> {task.dueDate}</span>}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                            {!editTask && (
+                              <div className="task-actions">
+                                <FiEdit className="action-icon" onClick={() => startEditing(task)} />
+                                <FiTrash className="action-icon" onClick={() => deleteTask(task.id)} />
                               </div>
-                            </div>
-                            <div className="task-actions">
-                              <FiEdit className="action-icon" onClick={() => setEditTask(task)} />
-                              <FiTrash className="action-icon" onClick={() => deleteTask(task.id)} />
-                            </div>
+                            )}
                           </div>
                         )}
                       </Draggable>
