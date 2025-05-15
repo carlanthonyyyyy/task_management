@@ -13,6 +13,9 @@
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
+  /* New variables */
+  --input-bg: #ffffff;
+  --text-color: var(--text-dark);
 }
 
 .dark {
@@ -20,6 +23,8 @@
   --background-light: #1a2a2a;
   --text-dark: #e9f4f1;
   --border-color: #2d4545;
+  --input-bg: #2d4545;
+  --text-color: #e9f4f1;
 }
 
 .app {
@@ -28,6 +33,8 @@
   color: var(--text-dark);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -133,6 +140,7 @@
   padding: var(--spacing-lg);
   max-width: 1200px;
   margin: 0 auto;
+  flex: 1;
 }
 
 .greeting-note {
@@ -174,9 +182,10 @@
 }
 
 .task-input-group {
-  display: flex;
-  flex-grow: 1;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
   gap: var(--spacing-sm);
+  width: 100%;
 }
 
 .task-input {
@@ -184,6 +193,8 @@
   padding: var(--spacing-sm);
   border: 2px solid var(--border-color);
   border-radius: var(--radius);
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 .due-date-input,
@@ -191,6 +202,8 @@
   padding: var(--spacing-xs) var(--spacing-sm);
   border: 2px solid var(--border-color);
   border-radius: var(--radius);
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 .add-button {
@@ -222,18 +235,61 @@
   margin-left: auto;
 }
 
-/* ... (keep other existing CSS rules the same) */
+/* New additions */
+.category-select, .priority-select {
+  padding: var(--spacing-xs);
+  border-radius: var(--radius);
+  border: 2px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
+
+.priority-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.priority-badge.high { background-color: #f44336; color: white; }
+.priority-badge.medium { background-color: #ff9800; color: white; }
+.priority-badge.low { background-color: #4caf50; color: white; }
+
+.edit-due-date-time {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.edit-due-date-time select,
+.edit-due-date-time input {
+  padding: var(--spacing-xs);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
 
 @media (max-width: 768px) {
   .header {
     padding: var(--spacing-sm);
+    flex-wrap: wrap;
   }
   
   .nav {
     gap: var(--spacing-xs);
+    order: 3;
+    width: 100%;
+    justify-content: center;
   }
   
   .task-input-group {
+    flex-direction: column;
+    grid-template-columns: 1fr;
+  }
+  
+  .task-controls {
     flex-direction: column;
   }
 }

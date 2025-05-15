@@ -11,7 +11,6 @@ import './Home.css';
 
 const Home = () => {
   const navigate = useNavigate();
-
   const [darkMode, setDarkMode] = useState(false);
   const [userId, setUserId] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -27,6 +26,10 @@ const Home = () => {
   const [editedDueTime, setEditedDueTime] = useState('');
   const [currentUserName, setCurrentUserName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [newCategory, setNewCategory] = useState('General');
+  const [newPriority, setNewPriority] = useState('medium');
+  const [editedCategory, setEditedCategory] = useState('General');
+  const [editedPriority, setEditedPriority] = useState('medium');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -77,8 +80,8 @@ const Home = () => {
         text: newTask,
         completed: false,
         dueDate: newDueDate && newDueTime ? `${newDueDate} ${newDueTime}` : newDueDate,
-        priority: 'medium',
-        category: 'General',
+        priority: newPriority,
+        category: newCategory,
       };
 
       const newTaskRef = push(ref(db, `tasks/${userId}`));
@@ -87,6 +90,8 @@ const Home = () => {
           setNewTask('');
           setNewDueDate('');
           setNewDueTime('');
+          setNewCategory('General');
+          setNewPriority('medium');
         })
         .catch((e) => console.error(e));
     }
@@ -110,6 +115,8 @@ const Home = () => {
   const startEditing = (task) => {
     setEditTask(task);
     setEditedText(task.text);
+    setEditedCategory(task.category || 'General');
+    setEditedPriority(task.priority || 'medium');
     if (task.dueDate) {
       const [datePart, timePart] = task.dueDate.split(' ');
       setEditedDueDate(datePart || '');
@@ -125,6 +132,8 @@ const Home = () => {
     setEditedText('');
     setEditedDueDate('');
     setEditedDueTime('');
+    setEditedCategory('General');
+    setEditedPriority('medium');
   };
 
   const saveEditedTask = (taskId) => {
@@ -138,12 +147,11 @@ const Home = () => {
       update(ref(db, `tasks/${userId}/${taskId}`), {
         text: editedText,
         dueDate: dueDateTime,
+        category: editedCategory,
+        priority: editedPriority,
       })
         .then(() => {
-          setEditTask(null);
-          setEditedText('');
-          setEditedDueDate('');
-          setEditedDueTime('');
+          cancelEdit();
         })
         .catch((error) => {
           console.error('Failed to update task:', error);
@@ -156,7 +164,6 @@ const Home = () => {
     navigate('/');
   };
 
-  // Calculate overdue tasks
   const overdueTasksCount = tasks.filter(task => {
     if (!task.completed && task.dueDate) {
       const dueDateTime = new Date(task.dueDate);
@@ -193,9 +200,7 @@ const Home = () => {
 
       <main className="main-content">
         <div className="greeting-note">
-          <h2>
-            {loading ? 'Loading...' : `Hi, ${currentUserName}`}
-          </h2>
+          <h2>{loading ? 'Loading...' : `Hi, ${currentUserName}`}</h2>
         </div>
 
         <div className="dashboard">
@@ -224,6 +229,26 @@ const Home = () => {
                 onKeyDown={(e) => e.key === 'Enter' && addTask()}
                 className="task-input"
               />
+              <select
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                className="category-select"
+              >
+                <option value="General">General</option>
+                <option value="Work">Work</option>
+                <option value="Personal">Personal</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Other">Other</option>
+              </select>
+              <select
+                value={newPriority}
+                onChange={(e) => setNewPriority(e.target.value)}
+                className="priority-select"
+              >
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
               <input
                 type="date"
                 value={newDueDate}
@@ -291,7 +316,7 @@ const Home = () => {
                               />
                             </div>
                             <div className="task-content">
-                              {editTask && editTask.id === task.id ? (
+                              {editTask?.id === task.id ? (
                                 <>
                                   <input
                                     className="task-edit-input"
@@ -305,6 +330,24 @@ const Home = () => {
                                     autoFocus
                                   />
                                   <div className="edit-due-date-time">
+                                    <select
+                                      value={editedCategory}
+                                      onChange={(e) => setEditedCategory(e.target.value)}
+                                    >
+                                      <option value="General">General</option>
+                                      <option value="Work">Work</option>
+                                      <option value="Personal">Personal</option>
+                                      <option value="Shopping">Shopping</option>
+                                      <option value="Other">Other</option>
+                                    </select>
+                                    <select
+                                      value={editedPriority}
+                                      onChange={(e) => setEditedPriority(e.target.value)}
+                                    >
+                                      <option value="high">High</option>
+                                      <option value="medium">Medium</option>
+                                      <option value="low">Low</option>
+                                    </select>
                                     <input
                                       type="date"
                                       value={editedDueDate}
@@ -327,8 +370,19 @@ const Home = () => {
                                     {task.text}
                                   </span>
                                   <div className="task-meta">
-                                    {task.category && <span className="category-badge">{task.category}</span>}
-                                    {task.dueDate && <span className="due-date"><FiCalendar size={14} /> {task.dueDate}</span>}
+                                    {task.category && (
+                                      <span className="category-badge">{task.category}</span>
+                                    )}
+                                    {task.priority && (
+                                      <span className={`priority-badge ${task.priority}`}>
+                                        {task.priority}
+                                      </span>
+                                    )}
+                                    {task.dueDate && (
+                                      <span className="due-date">
+                                        <FiCalendar size={14} /> {task.dueDate}
+                                      </span>
+                                    )}
                                   </div>
                                 </>
                               )}
