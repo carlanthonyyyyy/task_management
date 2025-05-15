@@ -42,10 +42,12 @@ const CalendarComponent = () => {
           setEvents(eventsArray);
         });
         return () => unsubscribeDb();
+      } else {
+        navigate('/');
       }
     });
     return () => unsubscribeAuth();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="calendar-container">
@@ -66,15 +68,18 @@ const CalendarComponent = () => {
         endAccessor="end"
         className="custom-calendar"
         style={{ height: 'calc(100vh - 150px)' }}
-        eventPropGetter={(event) => ({
-          style: {
-            backgroundColor: '#f0faf5',
-            border: '1px solid #3f8d66',
-            borderRadius: '4px',
-            color: '#2d3e40',
-            fontSize: '0.9em',
-          },
-        })}
+        eventPropGetter={(event) => {
+          const isOverdue = new Date(event.start) < new Date();
+          return {
+            style: {
+              backgroundColor: isOverdue ? '#ffdddd' : '#f0faf5',
+              border: `1px solid ${isOverdue ? '#ff4d4d' : '#3f8d66'}`,
+              borderRadius: '4px',
+              color: isOverdue ? '#a80000' : '#2d3e40',
+              fontSize: '0.9em',
+            },
+          };
+        }}
       />
     </div>
   );
