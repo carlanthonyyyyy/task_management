@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar'; // rename import to avoid conflict
+import { useNavigate } from 'react-router-dom';
+import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
@@ -23,7 +23,7 @@ const localizer = dateFnsLocalizer({
 
 const CalendarComponent = () => {
   const [events, setEvents] = useState([]);
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -41,32 +41,40 @@ const CalendarComponent = () => {
             : [];
           setEvents(eventsArray);
         });
-
-        // Cleanup DB listener on unmount
         return () => unsubscribeDb();
       }
     });
-
-    // Cleanup Auth listener on unmount
     return () => unsubscribeAuth();
   }, []);
 
   return (
     <div className="calendar-container">
-      <h2>Task Calendar</h2>
-      <button 
-        onClick={() => navigate(-1)} // Go back to the previous page in history
-        style={{ marginBottom: '10px', padding: '8px 12px', cursor: 'pointer' }}
-      >
-        ← Back
-      </button>
+      <div className="calendar-header">
+        <button 
+          onClick={() => navigate(-1)}
+          className="back-button"
+        >
+          ← Back to Dashboard
+        </button>
+        <h2 className="calendar-title">Task Calendar</h2>
+      </div>
+      
       <BigCalendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 500 }}
         className="custom-calendar"
+        style={{ height: 'calc(100vh - 150px)' }}
+        eventPropGetter={(event) => ({
+          style: {
+            backgroundColor: '#f0faf5',
+            border: '1px solid #3f8d66',
+            borderRadius: '4px',
+            color: '#2d3e40',
+            fontSize: '0.9em',
+          },
+        })}
       />
     </div>
   );
