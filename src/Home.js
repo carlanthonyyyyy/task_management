@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
-  FiPlus, FiSun, FiMoon, FiUser, FiTrash, FiEdit, FiCalendar
+  FiPlus, FiSun, FiMoon, FiUser, FiTrash, FiEdit, FiCalendar, FiLogOut
 } from 'react-icons/fi';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth, db } from './firebase';
@@ -174,7 +174,7 @@ const Home = () => {
             {showProfileMenu && (
               <div className="profile-menu">
                 <button className="profile-menu-item" onClick={handleLogout}>
-                  <FiSun /> Logout
+                  <FiLogOut /> Logout
                 </button>
               </div>
             )}
