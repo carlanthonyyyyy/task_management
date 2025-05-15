@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { auth, db } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { ref, set } from 'firebase/database';
+import { doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
@@ -10,31 +10,41 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignUp = async () => {
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+
+    // Input validation
+    if (!firstName || !lastName || !email || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+
     try {
-      // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      const uid = user.uid;
 
-      // Save user data in Realtime Database under the UID
-      await set(ref(db, 'users/' + uid), {
-        id: uid,
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
         firstName,
         lastName,
-        email
+        createdAt: new Date(),
+        role: 'user'
       });
 
-      // Save full name to localStorage
-      const fullName = `${firstName} ${lastName}`;
-      localStorage.setItem('userFullName', fullName);
-
-      alert('Account created successfully!');
-      navigate('/home');
-    } catch (error) {
-      alert(`Signup failed: ${error.message}`);
+      alert('Signed up successfully!');
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,36 +55,57 @@ function Signup() {
           <h1>TMA</h1>
           <p>Task Management System</p>
         </div>
+
         <div className="login-box">
           <h2>SIGN UP</h2>
-          <input
-            type="text"
-            placeholder="First name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Last name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div className="auth-buttons">
-            <button onClick={handleSignUp}>SIGN UP</button>
-            <button onClick={() => navigate('/')}>BACK</button>
-          </div>
+          <form onSubmit={handleSignUp}>
+            <label htmlFor="firstName">First Name:</label>
+            <input
+              id="firstName"
+              type="text"
+              placeholder="First name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+
+            <label htmlFor="lastName">Last Name:</label>
+            <input
+              id="lastName"
+              type="text"
+              placeholder="Last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+
+            <label htmlFor="email">Email:</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <label htmlFor="password">Password:</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            {error && <p className="error-message">{error}</p>}
+
+            <div className="auth-buttons">
+              <button type="submit" disabled={loading}>
+                {loading ? 'Signing up...' : 'SIGN UP'}
+              </button>
+              <button type="button" onClick={() => navigate('/')}>
+                BACK
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -103,3 +134,4 @@ function Signup() {
 }
 
 export default Signup;
+
