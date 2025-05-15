@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
-  FiPlus, FiSun, FiMoon, FiSettings, FiUser, FiTrash, FiEdit, FiCalendar
+  FiPlus, FiSun, FiMoon, FiUser, FiTrash, FiEdit, FiCalendar
 } from 'react-icons/fi';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth, db } from './firebase';
@@ -110,7 +110,6 @@ const Home = () => {
   const startEditing = (task) => {
     setEditTask(task);
     setEditedText(task.text);
-    // Extract due date and due time separately
     if (task.dueDate) {
       const [datePart, timePart] = task.dueDate.split(' ');
       setEditedDueDate(datePart || '');
@@ -165,7 +164,6 @@ const Home = () => {
           <Link to="/home">Home</Link>
           <Link to="/calendar">Calendar</Link>
           <Link to="/tasks">Tasks</Link>
-          <Link to="/settings">Settings</Link>
         </nav>
         <div className="header-controls">
           <button onClick={() => setDarkMode(!darkMode)} className="theme-toggle">
@@ -175,9 +173,9 @@ const Home = () => {
             <FiUser size={20} />
             {showProfileMenu && (
               <div className="profile-menu">
-                <button className="profile-menu-item"><FiSettings /> Account Settings</button>
-                <button className="profile-menu-item"><FiUser /> Profile</button>
-                <button className="profile-menu-item" onClick={handleLogout}><FiSun /> Logout</button>
+                <button className="profile-menu-item" onClick={handleLogout}>
+                  <FiSun /> Logout
+                </button>
               </div>
             )}
           </div>
@@ -343,21 +341,6 @@ const Home = () => {
           </DragDropContext>
         </div>
       </main>
-
-      <footer className="footer">
-        <div className="footer-links">
-          <a href="#support">Support</a>
-          <a href="#privacy">Privacy Policy</a>
-          <a href="#terms">Terms of Service</a>
-        </div>
-        <div className="social-media">
-          <span>Connect with us:</span>
-          <a href="#twitter">Twitter</a>
-          <a href="#linkedin">LinkedIn</a>
-          <a href="#facebook">Facebook</a>
-        </div>
-        <p className="copyright">© 2023 TaskFlow. All rights reserved.</p>
-      </footer>
     </div>
   );
 };
