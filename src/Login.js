@@ -10,12 +10,25 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    // Input validation
+    if (!email && !password) {
+      alert('Please enter your email and password.');
+      return;
+    } else if (!email) {
+      alert('Please enter your email.');
+      return;
+    } else if (!password) {
+      alert('Please enter your password.');
+      return;
+    }
+
+    // Firebase login
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert('Logged in successfully!');
-      navigate('/home'); // 👈 fixed to match route path
+      navigate('/Home');
     } catch (error) {
-      alert(error.message);
+      alert(error.message); // Keep default Firebase message
     }
   };
 
