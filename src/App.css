@@ -119,3 +119,9 @@ html,
 .contact-info p {
   margin: 4px 0;
 }
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 0.95rem;
+}
