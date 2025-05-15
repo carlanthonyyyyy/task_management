@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { Calendar as BigCalendar, dateFnsLocalizer } from 'react-big-calendar'; // rename import to avoid conflict
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
@@ -9,7 +10,7 @@ import { ref, onValue } from 'firebase/database';
 import { db, auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import 'src/Calendar.css';
+import './Calendar.css';
 
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({
@@ -22,32 +23,44 @@ const localizer = dateFnsLocalizer({
 
 const CalendarComponent = () => {
   const [events, setEvents] = useState([]);
-  const [userId, setUserId] = useState(null);
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserId(user.uid);
         const tasksRef = ref(db, `tasks/${user.uid}`);
-        onValue(tasksRef, (snapshot) => {
+        const unsubscribeDb = onValue(tasksRef, (snapshot) => {
           const data = snapshot.val();
-          const eventsArray = data ? Object.values(data).map(task => ({
-            title: task.text,
-            start: new Date(task.dueDate),
-            end: new Date(task.dueDate),
-            allDay: true,
-          })) : [];
+          const eventsArray = data
+            ? Object.values(data).map((task) => ({
+                title: task.text,
+                start: task.dueDate ? new Date(task.dueDate) : new Date(),
+                end: task.dueDate ? new Date(task.dueDate) : new Date(),
+                allDay: true,
+              }))
+            : [];
           setEvents(eventsArray);
         });
+
+        // Cleanup DB listener on unmount
+        return () => unsubscribeDb();
       }
     });
-    return () => unsubscribe();
+
+    // Cleanup Auth listener on unmount
+    return () => unsubscribeAuth();
   }, []);
 
   return (
     <div className="calendar-container">
       <h2>Task Calendar</h2>
-      <Calendar
+      <button 
+        onClick={() => navigate(-1)} // Go back to the previous page in history
+        style={{ marginBottom: '10px', padding: '8px 12px', cursor: 'pointer' }}
+      >
+        ← Back
+      </button>
+      <BigCalendar
         localizer={localizer}
         events={events}
         startAccessor="start"
