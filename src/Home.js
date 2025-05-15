@@ -156,6 +156,15 @@ const Home = () => {
     navigate('/');
   };
 
+  // Calculate overdue tasks
+  const overdueTasksCount = tasks.filter(task => {
+    if (!task.completed && task.dueDate) {
+      const dueDateTime = new Date(task.dueDate);
+      return !isNaN(dueDateTime) && dueDateTime < new Date();
+    }
+    return false;
+  }).length;
+
   return (
     <div className={`app ${darkMode ? 'dark' : ''}`}>
       <header className="header">
@@ -196,7 +205,7 @@ const Home = () => {
           </div>
           <div className="stats-card">
             <h3>⚠️ Overdue Tasks</h3>
-            <span className="accent-text">0</span>
+            <span className="accent-text">{overdueTasksCount}</span>
           </div>
           <div className="stats-card">
             <h3>✅ Completed</h3>
