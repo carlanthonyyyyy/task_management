@@ -1,0 +1,30 @@
+.calendar-container {
+  margin: 2rem auto;
+  max-width: 800px;
+  background: var(--background-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+}
+
+.custom-calendar .rbc-calendar {
+  background: var(--background-light);
+  color: var(--text-dark);
+  border-radius: var(--radius);
+}
+
+.custom-calendar .rbc-event {
+  background-color: var(--primary-color);
+  color: var(--text-light);
+  border-radius: var(--radius);
+}
+
+.custom-calendar .rbc-toolbar button {
+  background-color: var(--secondary-color);
+  color: var(--text-light);
+  border-radius: var(--radius);
+}
+
+.custom-calendar .rbc-toolbar button:hover {
+  background-color: var(--primary-color);
+}
