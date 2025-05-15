@@ -15,14 +15,12 @@ const Tasks = () => {
   const [newDueTime, setNewDueTime] = useState('');
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
-
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid);
-
         const tasksRef = ref(db, `tasks/${user.uid}`);
         onValue(tasksRef, (snapshot) => {
           const data = snapshot.val();
@@ -33,7 +31,6 @@ const Tasks = () => {
         });
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -80,7 +77,7 @@ const Tasks = () => {
 
   return (
     <div className="task-container">
-      <button className="back-button" onClick={() => navigate('/')}>
+      <button className="back-button" onClick={() => navigate('/home')}>
         <FiArrowLeft /> Back
       </button>
 
@@ -103,7 +100,7 @@ const Tasks = () => {
           value={newDueTime}
           onChange={(e) => setNewDueTime(e.target.value)}
         />
-        <button onClick={addTask} className="add-btn">
+        <button className="add-btn" onClick={addTask}>
           <FiPlus /> Add
         </button>
 
