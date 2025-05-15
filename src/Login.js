@@ -7,28 +7,36 @@ import './App.css';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
     // Input validation
     if (!email && !password) {
-      alert('Please enter your email and password.');
+      setError('Please enter your email and password.');
       return;
     } else if (!email) {
-      alert('Please enter your email.');
+      setError('Please enter your email.');
       return;
     } else if (!password) {
-      alert('Please enter your password.');
+      setError('Please enter your password.');
       return;
     }
 
-    // Firebase login
+    setError('');
+    setLoading(true);
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert('Logged in successfully!');
       navigate('/Home');
-    } catch (error) {
-      alert(error.message); // Keep default Firebase message
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,22 +50,38 @@ function Login() {
         </div>
         <div className="login-box">
           <h2>LOG IN</h2>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div className="auth-buttons">
-            <button onClick={handleLogin}>LOG IN</button>
-            <button onClick={() => navigate('/signup')}>SIGN UP</button>
-          </div>
+          <form onSubmit={handleLogin}>
+            <label htmlFor="email">Email:</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-label="Email"
+            />
+
+            <label htmlFor="password">Password:</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              aria-label="Password"
+            />
+
+            {error && <p className="error-message">{error}</p>}
+
+            <div className="auth-buttons">
+              <button type="submit" disabled={loading}>
+                {loading ? 'Logging in...' : 'LOG IN'}
+              </button>
+              <button type="button" onClick={() => navigate('/signup')}>
+                SIGN UP
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
