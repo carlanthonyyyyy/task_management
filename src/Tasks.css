@@ -1,44 +1,120 @@
-.task-component {
-  padding: 1rem;
+.task-container {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
-.task-filter-controls {
-  display: flex;
-  gap: 1rem;
+.task-title {
+  font-size: 2rem;
   margin-bottom: 1rem;
+  color: #222;
+  text-align: center;
+}
+
+.back-button {
+  background: transparent;
+  border: none;
+  color: #444;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.back-button svg {
+  margin-right: 6px;
+}
+
+.task-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.task-controls input,
+.task-controls select,
+.task-controls button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.task-controls input[type="text"] {
+  flex: 2;
+}
+
+.task-controls button.add-btn {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: 0.2s ease;
+}
+
+.task-controls button.add-btn:hover {
+  background: #4338ca;
 }
 
 .task-list {
-  list-style: none;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .task-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  border-radius: 5px;
-  transition: background 0.3s ease;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.1s ease;
 }
 
-.task-item.completed .task-text {
+.task-item.dragging {
+  transform: scale(1.02);
+  background: #e0e7ff;
+}
+
+.task-details p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.task-details p.completed {
   text-decoration: line-through;
-  color: #888;
+  color: #999;
 }
 
-.task-actions .action-icon {
-  cursor: pointer;
-  margin-left: 0.5rem;
-}
-
-.task-meta {
-  font-size: 0.8rem;
+.task-details small {
+  display: flex;
+  align-items: center;
   color: #666;
+  margin-top: 4px;
 }
 
-.due-date {
+.task-details small svg {
+  margin-right: 4px;
+}
+
+.task-actions svg {
   margin-left: 10px;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.2s ease;
+}
+
+.task-actions svg:hover {
+  color: #e11d48;
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { FiPlus, FiEdit, FiTrash, FiCalendar } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash, FiCalendar, FiArrowLeft } from 'react-icons/fi';
 import { ref, get, push, set, onValue, remove, update } from 'firebase/database';
 import { auth, db } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -14,6 +15,8 @@ const Tasks = () => {
   const [newDueTime, setNewDueTime] = useState('');
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -77,6 +80,10 @@ const Tasks = () => {
 
   return (
     <div className="task-container">
+      <button className="back-button" onClick={() => navigate('/')}>
+        <FiArrowLeft /> Back
+      </button>
+
       <h2 className="task-title">Your Tasks</h2>
 
       <div className="task-controls">
@@ -96,7 +103,9 @@ const Tasks = () => {
           value={newDueTime}
           onChange={(e) => setNewDueTime(e.target.value)}
         />
-        <button onClick={addTask}><FiPlus /> Add</button>
+        <button onClick={addTask} className="add-btn">
+          <FiPlus /> Add
+        </button>
 
         <select onChange={(e) => setFilter(e.target.value)}>
           <option value="all">All</option>
