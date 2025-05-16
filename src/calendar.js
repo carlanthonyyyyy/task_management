@@ -10,7 +10,7 @@ import { ref, onValue } from 'firebase/database';
 import { db, auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import './Calendar.css';
+import './calendar.css';
 
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({
