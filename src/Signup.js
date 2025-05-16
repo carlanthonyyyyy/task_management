@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { auth, db } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { ref, set } from 'firebase/database'; // <-- use from firebase/database
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
@@ -17,7 +17,6 @@ function Signup() {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    // Input validation
     if (!firstName || !lastName || !email || !password) {
       setError('Please fill in all fields.');
       return;
@@ -30,12 +29,13 @@ function Signup() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await setDoc(doc(db, 'users', user.uid), {
+      // ✅ Write to Realtime Database instead of Firestore
+      await set(ref(db, 'users/' + user.uid), {
         uid: user.uid,
         email: user.email,
         firstName,
         lastName,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
         role: 'user'
       });
 
