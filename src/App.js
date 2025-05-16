@@ -4,7 +4,7 @@ import Login from './Login';
 import Signup from './Signup';
 import Home from './Home';
 import Tasks from './Tasks';
-import CalendarComponent from './Calendar';  // Only import the component you exported
+import CalendarComponent from './calendar';  // Only import the component you exported
 
 function App() {
   return (
