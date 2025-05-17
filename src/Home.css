@@ -61,6 +61,18 @@
   -webkit-text-fill-color: transparent;
 }
 
+.logo h2 {
+  font-size: 48px;
+  margin: 0;
+  color: #3f8d66; /* Fallback for unsupported browsers */
+  background: linear-gradient(135deg, #3f8d66, #2e6e4f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
 .nav {
   display: flex;
   gap: var(--spacing-md);

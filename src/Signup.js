@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { ref, set } from 'firebase/database'; // <-- use from firebase/database
+import { ref, set } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
@@ -10,26 +10,37 @@ function Signup() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (notification.show) {
+      const timer = setTimeout(() => {
+        setNotification({ ...notification, show: false });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification.show]);
+
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
 
     if (!firstName || !lastName || !email || !password) {
-      setError('Please fill in all fields.');
+      showNotification('Please fill in all fields.', 'error');
       return;
     }
 
-    setError('');
     setLoading(true);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // ✅ Write to Realtime Database instead of Firestore
       await set(ref(db, 'users/' + user.uid), {
         uid: user.uid,
         email: user.email,
@@ -39,10 +50,10 @@ function Signup() {
         role: 'user'
       });
 
-      alert('Signed up successfully!');
+      showNotification('Account created successfully!', 'success');
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      showNotification(err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -50,9 +61,16 @@ function Signup() {
 
   return (
     <div className="container">
+      {/* Notification Popup */}
+      {notification.show && (
+        <div className={`notification ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
+
       <div className="left-panel">
         <div className="logo">
-          <h1>TMA</h1>
+          <h2>TaskFlow</h2>
           <p>Task Management System</p>
         </div>
 
@@ -66,6 +84,7 @@ function Signup() {
               placeholder="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
+              aria-label="First Name"
             />
 
             <label htmlFor="lastName">Last Name:</label>
@@ -75,6 +94,7 @@ function Signup() {
               placeholder="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
+              aria-label="Last Name"
             />
 
             <label htmlFor="email">Email:</label>
@@ -84,6 +104,7 @@ function Signup() {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              aria-label="Email"
             />
 
             <label htmlFor="password">Password:</label>
@@ -93,9 +114,8 @@ function Signup() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              aria-label="Password"
             />
-
-            {error && <p className="error-message">{error}</p>}
 
             <div className="auth-buttons">
               <button type="submit" disabled={loading}>
@@ -134,4 +154,3 @@ function Signup() {
 }
 
 export default Signup;
-

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -7,34 +7,46 @@ import './App.css';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (notification.show) {
+      const timer = setTimeout(() => {
+        setNotification({ ...notification, show: false });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification.show]);
+
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     // Input validation
     if (!email && !password) {
-      setError('Please enter your email and password.');
+      showNotification('Please enter your email and password.', 'error');
       return;
     } else if (!email) {
-      setError('Please enter your email.');
+      showNotification('Please enter your email.', 'error');
       return;
     } else if (!password) {
-      setError('Please enter your password.');
+      showNotification('Please enter your password.', 'error');
       return;
     }
 
-    setError('');
     setLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert('Logged in successfully!');
+      showNotification('Logged in successfully!', 'success');
       navigate('/Home');
     } catch (err) {
-      setError(err.message);
+      showNotification(err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -42,10 +54,17 @@ function Login() {
 
   return (
     <div className="container">
+      {/* Notification Popup */}
+      {notification.show && (
+        <div className={`notification ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
+
       {/* Left Panel */}
       <div className="left-panel">
         <div className="logo">
-          <h1>TMA</h1>
+          <h2>TaskFlow</h2>
           <p>Task Management System</p>
         </div>
         <div className="login-box">
@@ -70,8 +89,6 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               aria-label="Password"
             />
-
-            {error && <p className="error-message">{error}</p>}
 
             <div className="auth-buttons">
               <button type="submit" disabled={loading}>

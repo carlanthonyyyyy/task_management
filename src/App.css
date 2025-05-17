@@ -26,15 +26,23 @@ html,
   margin-bottom: 80px;
 }
 
-.logo h1 {
-  font-size: 36px;
+.logo h2 {
+  font-size: 48px;
   margin: 0;
+  color: #3f8d66; /* Fallback for unsupported browsers */
+  background: linear-gradient(135deg, #3f8d66, #2e6e4f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: -1px;
 }
 
 .logo p {
-  font-size: 14px;
-  color: gray;
-  margin-top: 5px;
+  font-size: 16px;
+  color: #666;
+  margin-top: 10px;
+  font-weight: 500;
 }
 
 .login-box {
@@ -136,7 +144,7 @@ html,
   border-radius: 12px;
 }
 
-/* Footer Info */
+/* Contact Info */
 .contact-info {
   font-size: 12px;
   text-align: center;
@@ -146,14 +154,68 @@ html,
   margin: 4px 0;
 }
 
-/* Error Message */
-.error-message {
-  color: red;
-  background-color: #ffe6e6;
-  border: 1px solid red;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 0.95rem;
+/* Notifications */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  border-radius: 8px;
+  color: white;
   font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
 }
 
+.notification.success {
+  background-color: #3f8d66;
+  border: 2px solid #2e6e4f;
+}
+
+.notification.error {
+  background-color: #ff4444;
+  border: 2px solid #cc0000;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left-panel,
+  .right-panel {
+    padding: 20px;
+  }
+
+  .logo {
+    margin-bottom: 40px;
+  }
+
+  .logo h1 {
+    font-size: 36px;
+  }
+
+  .login-box {
+    max-width: 100%;
+  }
+
+  .help-box h2 {
+    font-size: 24px;
+  }
+
+  .notification {
+    width: 90%;
+    right: 5%;
+  }
+}
