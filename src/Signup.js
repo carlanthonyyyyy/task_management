@@ -51,7 +51,7 @@ function Signup() {
       });
 
       showNotification('Account created successfully!', 'success');
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       showNotification(err.message, 'error');
     } finally {
