@@ -18,7 +18,7 @@ const Home = () => {
   const [newDueDate, setNewDueDate] = useState('');
   const [newDueTime, setNewDueTime] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('active');
   const [sortBy, setSortBy] = useState('priority');
   const [editTask, setEditTask] = useState(null);
   const [editedText, setEditedText] = useState('');
@@ -266,10 +266,11 @@ const Home = () => {
               <FiPlus size={18} /> Add Task
             </button>
             <div className="filter-group">
-              <select onChange={(e) => setFilter(e.target.value)} className="filter-select">
+              <select onChange={(e) => setFilter(e.target.value)} className="filter-select" value={filter}>
+                <option value="active">Active</option>
                 <option value="all">All Tasks</option>
                 <option value="completed">Completed</option>
-                <option value="active">Active</option>
+                
               </select>
               <select onChange={(e) => setSortBy(e.target.value)} className="filter-select">
                 <option value="priority">Priority</option>
