@@ -149,3 +149,8 @@
 .back-button:hover {
   background-color: #41976e;
 }
+/* Dark mode overrides */
+.dark .task-item {
+  background: #223f3f;
+  color: white; 
+}
