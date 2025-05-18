@@ -85,7 +85,9 @@
   border-radius: var(--radius);
   transition: var(--transition);
   font-weight: 500;
+  font-size: 1.3rem; /* Increased font size */
 }
+
 
 .nav a:hover {
   background: rgba(255, 255, 255, 0.1);

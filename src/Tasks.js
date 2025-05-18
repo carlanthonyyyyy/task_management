@@ -15,6 +15,11 @@ const Tasks = () => {
   const [newDueTime, setNewDueTime] = useState('');
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('priority');
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editedText, setEditedText] = useState('');
+  const [editedDueDate, setEditedDueDate] = useState('');
+  const [editedDueTime, setEditedDueTime] = useState('');
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,6 +78,22 @@ const Tasks = () => {
         completed: !updatedTask.completed,
       });
     }
+  };
+
+  const saveEditedTask = (taskId) => {
+    const updatedFields = {
+      text: editedText,
+      dueDate: editedDueDate && editedDueTime
+        ? `${editedDueDate} ${editedDueTime}`
+        : editedDueDate,
+    };
+
+    update(ref(db, `tasks/${userId}/${taskId}`), updatedFields).then(() => {
+      setEditingTaskId(null);
+      setEditedText('');
+      setEditedDueDate('');
+      setEditedDueTime('');
+    });
   };
 
   return (
@@ -150,16 +171,48 @@ const Tasks = () => {
                           checked={task.completed}
                           onChange={() => toggleTask(task.id)}
                         />
-                        <div className="task-details">
-                          <p className={task.completed ? 'completed' : ''}>{task.text}</p>
-                          {task.dueDate && (
-                            <small><FiCalendar /> {task.dueDate}</small>
-                          )}
-                        </div>
-                        <div className="task-actions">
-                          <FiEdit />
-                          <FiTrash onClick={() => deleteTask(task.id)} />
-                        </div>
+                        {editingTaskId === task.id ? (
+                          <div className="task-editing">
+                            <input
+                              type="text"
+                              value={editedText}
+                              onChange={(e) => setEditedText(e.target.value)}
+                            />
+                            <input
+                              type="date"
+                              value={editedDueDate}
+                              onChange={(e) => setEditedDueDate(e.target.value)}
+                            />
+                            <input
+                              type="time"
+                              value={editedDueTime}
+                              onChange={(e) => setEditedDueTime(e.target.value)}
+                            />
+                            <button onClick={() => saveEditedTask(task.id)}>Save</button>
+                            <button onClick={() => setEditingTaskId(null)}>Cancel</button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="task-details">
+                              <p className={task.completed ? 'completed' : ''}>{task.text}</p>
+                              {task.dueDate && (
+                                <small><FiCalendar /> {task.dueDate}</small>
+                              )}
+                            </div>
+                            <div className="task-actions">
+                              <FiEdit
+                                onClick={() => {
+                                  setEditingTaskId(task.id);
+                                  setEditedText(task.text);
+                                  const [date, time] = (task.dueDate || '').split(' ');
+                                  setEditedDueDate(date || '');
+                                  setEditedDueTime(time || '');
+                                }}
+                              />
+                              <FiTrash onClick={() => deleteTask(task.id)} />
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </Draggable>

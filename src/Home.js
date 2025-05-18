@@ -177,9 +177,9 @@ const Home = () => {
       <header className="header">
         <div className="logo"><h1>TaskFlow</h1></div>
         <nav className="nav">
-          <Link to="/home">Home</Link>
-          <Link to="/calendar">Calendar</Link>
-          <Link to="/tasks">Tasks</Link>
+          <Link to="/home">🏠 Home</Link>
+          <Link to="/calendar">🗓️ Calendar</Link>
+          <Link to="/tasks">📝 Tasks</Link>
         </nav>
         <div className="header-controls">
           <button onClick={() => setDarkMode(!darkMode)} className="theme-toggle">
