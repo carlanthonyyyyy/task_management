@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import {
-  FiPlus, FiSun, FiMoon, FiUser, FiTrash, FiEdit, FiCalendar, FiLogOut
+  FiPlus, FiSun, FiMoon, FiUser, FiTrash, FiEdit, FiCalendar, FiLogOut, FiChevronDown, FiChevronUp
 } from 'react-icons/fi';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth, db } from './firebase';
@@ -30,6 +30,9 @@ const Home = () => {
   const [newPriority, setNewPriority] = useState('medium');
   const [editedCategory, setEditedCategory] = useState('General');
   const [editedPriority, setEditedPriority] = useState('medium');
+  const [showOverdueModal, setShowOverdueModal] = useState(false);
+  const [showOverdueDropdown, setShowOverdueDropdown] = useState(false);
+  const [overdueTasks, setOverdueTasks] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -55,6 +58,19 @@ const Home = () => {
             ? Object.entries(data).map(([key, val]) => ({ ...val, id: key }))
             : [];
           setTasks(loadedTasks);
+
+          const overdue = loadedTasks.filter(task => {
+            if (!task.completed && task.dueDate) {
+              const due = new Date(task.dueDate);
+              return !isNaN(due) && due < new Date();
+            }
+            return false;
+          });
+
+          setOverdueTasks(overdue);
+          if (overdue.length > 0) {
+            setTimeout(() => setShowOverdueModal(true), 500);
+          }
         });
 
         setLoading(false);
@@ -164,13 +180,39 @@ const Home = () => {
     navigate('/');
   };
 
-  const overdueTasksCount = tasks.filter(task => {
-    if (!task.completed && task.dueDate) {
-      const dueDateTime = new Date(task.dueDate);
-      return !isNaN(dueDateTime) && dueDateTime < new Date();
-    }
-    return false;
-  }).length;
+  const OverdueModal = () => (
+    <div className="modal-overlay">
+      <div className="modal">
+        <h3>⚠️ Overdue Tasks</h3>
+        <p>You have <strong>{overdueTasks.length}</strong> overdue task{overdueTasks.length !== 1 ? 's' : ''}.</p>
+        <button
+          className="dropdown-toggle"
+          onClick={() => setShowOverdueDropdown(!showOverdueDropdown)}
+        >
+          {showOverdueDropdown ? (
+            <>
+              Hide Overdue Tasks <FiChevronUp />
+            </>
+          ) : (
+            <>
+              Show Overdue Tasks <FiChevronDown />
+            </>
+          )}
+        </button>
+
+        {showOverdueDropdown && (
+          <ul className="overdue-task-list">
+            {overdueTasks.map(task => (
+              <li key={task.id}>
+                <strong>{task.text}</strong> – <em>{task.dueDate}</em>
+              </li>
+            ))}
+          </ul>
+        )}
+        <button onClick={() => setShowOverdueModal(false)}>Dismiss</button>
+      </div>
+    </div>
+  );
 
   return (
     <div className={`app ${darkMode ? 'dark' : ''}`}>
@@ -199,8 +241,9 @@ const Home = () => {
       </header>
 
       <main className="main-content">
-        <div className="greeting-note">
+        <div className="greeting-note modal-inline-wrapper">
           <h2>{loading ? 'Loading...' : `Hi, ${currentUserName}`}</h2>
+          {showOverdueModal && <OverdueModal />}
         </div>
 
         <div className="dashboard">
@@ -210,7 +253,11 @@ const Home = () => {
           </div>
           <div className="stats-card">
             <h3>⚠️ Overdue Tasks</h3>
-            <span className="accent-text">{overdueTasksCount}</span>
+            <p>
+  You have <strong>{overdueTasks.length}</strong> overdue task
+  {overdueTasks.length !== 1 ? 's' : ''}.
+</p>
+
           </div>
           <div className="stats-card">
             <h3>✅ Completed</h3>
@@ -404,6 +451,7 @@ const Home = () => {
             </Droppable>
           </DragDropContext>
         </div>
+
       </main>
     </div>
   );
